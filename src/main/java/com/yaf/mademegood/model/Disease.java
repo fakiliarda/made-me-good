@@ -1,14 +1,8 @@
 package com.yaf.mademegood.model;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * @author arda.fakili
@@ -18,11 +12,14 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "disease")
 @ToString
+@RequiredArgsConstructor
+@NoArgsConstructor
 public class Disease {
 
-
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Getter
+    @Setter
     private Long id;
 
     @Getter
@@ -43,9 +40,6 @@ public class Disease {
     @Getter
     @Setter
     private String explanation;
-
-
-
 
 
 }

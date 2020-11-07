@@ -2,10 +2,12 @@ package com.yaf.mademegood.controller;
 
 import com.yaf.mademegood.model.Disease;
 import com.yaf.mademegood.service.DiseaseService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
+
+import javax.validation.Valid;
 
 /**
  * @author arda.fakili
@@ -14,6 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping("admin")
+@CrossOrigin("*")
 public class AdminController {
 
     private final DiseaseService diseaseService;
@@ -23,30 +26,53 @@ public class AdminController {
     }
 
     @GetMapping("hastalik")
-    public ModelAndView diseases() {
+    public String diseases(Model model) {
 
-        ModelAndView model = new ModelAndView("admin/diseases");
-        model.addObject("diseases", diseaseService.getAllDiseases());
+        model.addAttribute("diseases", diseaseService.getAllDiseases());
+        model.addAttribute("disease", new Disease());
+        model.addAttribute("diseaseToEdit", new Disease());
+
+        return "admin/diseases-table";
+    }
+
+    @GetMapping("hastalik/sil/{id}")
+    public String deleteDisease(@PathVariable(name = "id") Long id) {
+        diseaseService.deleteDiseaseById(id);
+        return "redirect:/admin/hastalik";
+    }
+
+    @GetMapping("hastalik/guncelle/{id}")
+    public Model showUpdateDisease(@PathVariable(name = "id") Long id, Model model) {
+
+        model.addAttribute("diseaseToUpdate", diseaseService.getDiseaseById(id));
 
         return model;
     }
 
-    @PostMapping("hastalik")
-    public String addDisease(@RequestParam(name = "disease") Disease disease) {
+    @PostMapping("hastalik/ekle")
+    public String addDisease(@Valid Disease disease, BindingResult result) {
+
+        if (result.hasErrors()) {
+            return "redirect:/admin/hastalik";
+        }
+
         diseaseService.addDisease(disease);
-        return "admin/diseases";
+        return "redirect:/admin/hastalik";
     }
 
-    @DeleteMapping("hastalik")
-    public String deleteDisease(@RequestParam(name = "id") Long id) {
-        diseaseService.deleteDiseaseById(id);
-        return "admin/diseases";
-    }
 
-    @PostMapping("hastalik")
-    public String updateDisease(@RequestParam(name = "disease") Disease disease) {
+    @PostMapping("hastalik/guncelle/{id}")
+    public String editDisease(@PathVariable(name = "id") Long id, @Valid Disease disease, BindingResult result, Model model) {
+
+        if (result.hasErrors()) {
+            disease.setId(id);
+            return "admin/diseases-table-update";
+        }
+
+        disease.setId(id);
         diseaseService.updateDisease(disease);
-        return "admin/diseases";
+
+        return "redirect:/admin/hastalik";
     }
 
 }
